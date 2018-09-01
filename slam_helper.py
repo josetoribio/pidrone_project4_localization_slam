@@ -12,7 +12,6 @@ import cv2
 
 # set one these to true to save the poses or weights from the flight
 POSE  = True
-WEIGHT = False
 
 # ----- camera parameters DO NOT EDIT ------- #
 CAMERA_SCALE = 290.
@@ -26,7 +25,8 @@ KEYFRAME_DIST_THRESHOLD = CAMERA_HEIGHT
 KEYFRAME_YAW_THRESHOLD = 0.175
 
 # ----- edit to where you want the pose data written --------- #
-pose_path = 'pose_data.txt'
+path = 'pose_data.txt'
+
 
 class Particle:
     """
@@ -59,8 +59,8 @@ class FastSLAM:
         self.key_kp = None
         self.key_des = None
 
-        if POSE or WEIGHT:
-            self.file = open(pose_path, 'w')
+        if POSE:
+            self.file = open(path, 'w')
 
         # --------------- openCV parameters --------------------- #
         index_params = dict(algorithm=6, table_number=6, key_size=12, multi_probe_level=1)
@@ -114,11 +114,32 @@ class FastSLAM:
         # print the average number of landmarks per particles
         # print "LM: ", np.sum([len(p.landmarks) for p in self.particles]) / float(self.num_particles)
 
-        # write poses to a text file to be animated
+        # so the issue now is that the kp are local and everything else global, but we can
+        # put the kp through kp_to_measurement and just add the range/bearing to particle[0] pose
+
+        # or can I literally just do particle pose [x,y] + [dx , dy] and that gives the global pose question mark
+        # yes that is true let's do that
+
+        # write data to a text file to be animated
         if POSE:
-            for p in self.particles:
-                self.file.write(str(p.pose[0]) + '\n')
-                self.file.write(str(p.pose[1]) + '\n')
+            if self.particles is not None and self.particles[0].landmarks != []:
+                # write the poses of all the particles
+                self.file.write(str([[p.pose[0], p.pose[1]] for p in self.particles]) + '\n')
+                # write the landmark poses for the first particle
+                self.file.write(str([[lm.x, lm.y] for lm in self.particles[0].landmarks]) + '\n')
+                # write the GLOBAL poses of all the currently observed features relative to first particle
+                poses = []
+                for k in kp:
+                    kp_x, kp_y = k[0], k[1]
+                    # key point y is measured from the top left
+                    kp_y = CAMERA_HEIGHT - kp_y
+
+                    dx = kp_x - CAMERA_WIDTH / 2
+                    dy = kp_y - CAMERA_HEIGHT / 2
+                    pose = [self.pixel_to_meter(dx) + self.particles[0].pose[0],
+                            self.pixel_to_meter(dy) + self.particles[0].pose[1]]
+                    poses.append(pose)
+                self.file.write(str(poses) + '\n')
 
         self.z = z
 
