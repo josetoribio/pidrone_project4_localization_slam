@@ -1,5 +1,5 @@
 """
-compute_transformation
+compute_displacement
 
 In this task, you will use OpenCV to implement the motion
 model for localization and SLAM on the drone. This involves computing the
