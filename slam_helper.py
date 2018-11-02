@@ -1,7 +1,14 @@
 """
-slam_helper.py
+student_slam_helper.py
 
-Implements fastSLAM for the pidrone
+Here is where you will implement FastSLAM for the PiDrone. Follow the docstrings
+and the directions in the online text book to complete the assignment. When you
+are ready to test your code, run the included slam.py file, which will read
+the sample flight data from map_data.txt and run your SLAM implementation.
+The pre-implemented code in the "if POSE" block in the run method below will
+write the output of your program to pose_data.txt. You can run animate_slam.py
+to view the animation of your program! It should resemble the sample animation
+which we provide.
 """
 
 import numpy as np
@@ -10,7 +17,7 @@ import utils
 import copy
 import cv2
 
-# set one these to true to save the poses or weights from the flight
+# set to true in order to print the poses to a file
 POSE  = True
 
 # ----- camera parameters DO NOT EDIT ------- #
@@ -21,8 +28,8 @@ MATCH_RATIO = 0.7
 
 # ----- SLAM parameters ------- #
 PROB_THRESHOLD = 0.005
-KEYFRAME_DIST_THRESHOLD = CAMERA_HEIGHT
-KEYFRAME_YAW_THRESHOLD = 0.175
+KEYFRAME_DIST_THRESHOLD = # TODO choose this value
+KEYFRAME_YAW_THRESHOLD = # TODO choose this value
 
 # ----- edit to where you want the pose data written --------- #
 path = 'pose_data.txt'
@@ -213,7 +220,7 @@ class FastSLAM:
 
     def update_map(self, kp, des):
         """
-        starts a thread to update the map
+        DOESN'T start a thread to update the map
 
         :param kp, des: the lists of keypoints and descriptors
         """
@@ -304,26 +311,33 @@ class FastSLAM:
 
     def get_average_weight(self):
         """
-        the average weight of all the particles
+        Gets the average weight of all the particles in the filter
 
-        :param particles: the set of particles whose weight will be averaged
+        :param: none
+        :return: the average weight of all the particles in the filter
         """
-        return np.sum([p.weight for p in self.particles]) / float(self.num_particles)
+        # TODO implement this method (try to do it in one line!)
 
     def pixel_to_meter(self, px):
         """
-        uses the camera scale to convert pixel measurements into meters
+        Uses the camera scale to convert pixel measurements into meters. You
+        should use your code from the localization assignment.
 
         :param px: the distance in pixels to convert
+        :return: px converted to meters
         """
         return px * self.z / CAMERA_SCALE
 
     def kp_to_measurement(self, kp):
         """
-        Computes the range and bearing from the center of the camera frame to (kp.x, kp.y)
-        bearing is in (-pi/2, pi/2) measured in the standard math way
+        Computes the range and bearing from the center of the camera frame to
+        kp.pt, which is the [x,y] location of an extracted feature. The bearing
+        should be in (-pi/2, pi/2) measured in the standard math way.
 
         :param kp: they keypoint to measure from
+        :return: the distance, bearing from the center of the camera to kp
+
+        You do not need to edit this method.
         """
         kp_x, kp_y = kp[0], kp[1]
         # key point y is measured from the top left
@@ -339,94 +353,56 @@ class FastSLAM:
 
     def update_perceptual_range(self):
         """
-        computes the perceptual range of the drone: the distance from the center of the frame to the
-        width-wise border of the frame
+        Resets the perceptual range of the drone which indicates how far the
+        drone can "see." The distance is from the point in the plane directly
+        below the drone to the farthest point in the plane it can see. You s
+        should decide on a reasonable proxy for the perceptual range. This
+        method must be called in every time step because the drone can see
+        farther as it flies higher!
         """
-        self.perceptual_range = self.pixel_to_meter(CAMERA_WIDTH / 2)
+        # TODO impement this method
 
     def resample_particles(self):
         """
-        resample particles according to their weight
+        Resamples the particles according to their weight. This method should be
+        largely the same as the version from localization, except you will be
+        replacing the self.particles list with one made by deep copying from the
+        existing set of particles.
 
-        :param particles: the set of particles to resample
-        :return: a new set of particles, resampled with replacement according to their weight
+        :param: nothing
+        :return: nothing
         """
 
-        weight_sum = 0.0
-        new_particles = []
-        normal_weights = np.array([])
-
-        weights = [p.weight for p in self.particles]
-        lowest_weight = min(weights)
-
-        for w in weights:
-            x = 1 - (w / lowest_weight)
-            if x == 0:
-                x = PROB_THRESHOLD
-            normal_weights = np.append(normal_weights, x)
-            weight_sum += x
-
-        normal_weights /= weight_sum
-        samples = np.random.multinomial(self.num_particles, normal_weights)
-        for i, count in enumerate(samples):
-            for _ in range(count):
-                new_particles.append(copy.deepcopy(self.particles[i]))
-
-        self.particles = new_particles
+        # TODO implement this method
 
 
 def scale_weight(match0, match1):
     """
-    uses the distances of the two best matches to provide a weight scaled between 0 and 1
+    Uses the Hamming distances of the two best matches for a descriptor to
+    provide a weight scaled between 0 and 1 which represents the probability of
+    the match. Consider how you can use the difference in Hamming distance
+    (match quality) between the two best matches for a descriptor to measure how
+    "good" the first match is.
 
     :param match0: the hamming distance of the first best match
     :param match1: the hamming distance of the second best match
+    :return: the scaled weight which indicates the quality of the match
     """
-    scaled = (match1 - match0) / float(match1)
-    if scaled == 0:
-        scaled = PROB_THRESHOLD
-    return scaled
+    # TODO implement this method
 
 
 def estimate_pose(particles):
     """
-    retrieves the drone's estimated position by summing each particle's pose estimate multiplied
-    by its weight
+    Return the drone's estimated position using the expectation of the
+    belief distribution, which is the weighted sum of the poses of all the
+    particles in the filter, weighted by the weight of the particle. Note
+    that the weights must be normalized to 1 for this to work. This code should
+    be the same as in localization.
 
-    some mathematical motivation Expectation[X] = sum over all x in X of p(x) * x
+    Some mathematical motivation Expectation[X] =
+                                                sum over all x in X of p(x) * x
 
     :param particles: the set of particles to estimate a position for
     :return: the estimated pose [x,y,z,yaw]
     """
-    weight_sum = 0.0
-    normal_weights = np.array([])
-
-    weights = [p.weight for p in particles]
-    lowest_weight = min(weights)
-
-    for w in weights:
-        x = 1 - (w / lowest_weight)
-        if x == 0:
-            x = PROB_THRESHOLD
-        normal_weights = np.append(normal_weights, x)
-        weight_sum += x
-
-    normal_weights /= weight_sum
-
-    x = 0.0
-    y = 0
-    z = 0
-    yaw = 0
-
-    for i, prob in enumerate(normal_weights):
-        x += prob * particles[i].pose[0]
-        y += prob * particles[i].pose[1]
-        z += prob * particles[i].pose[2]
-        yaw += prob * particles[i].pose[3]
-
-    yaw = utils.adjust_angle(yaw)
-
-    return [x, y, z, yaw]
-
-
-
+    # TODO implement this method

@@ -7,8 +7,8 @@ The following is a list of the files included with your project handout and an e
 ## Localization
 **particle_filter.py** This contains your implementation of the simple particle filter for the first part of the localization assignment.  
 **animate_particle_filter.py** This code uses matplotlib to animate the simple particle filter. It can also be used to view the output of your localization code after flying with the drone.
-**compute_displacement.py** This contains your implementation of the OpenCV task.
-**answers.txt** This contains your answers to conceptual questions in the OpenCV task.
+**compute_displacement.py** This contains your implementation of the OpenCV task.  
+**answers.txt** This contains your answers to conceptual questions in the OpenCV task.  
 **localization_helper.py** This contains your implementation of localization for the PiDrone.  
 **vision_localization_onboard.py** This runs the student implementation of localization on the drone and does not need to be edited.  
 
