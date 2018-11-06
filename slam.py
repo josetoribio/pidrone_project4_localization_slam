@@ -5,7 +5,7 @@ slam_helper.py
 
 # most amazing and greatest python library
 import ast
-from slam_helper import FastSLAM
+from student_slam_helper import FastSLAM
 import numpy as np
 
 map_path = 'map_data.txt'

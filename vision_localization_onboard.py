@@ -1,5 +1,5 @@
 """
-vision_localization.py
+vision_localization_onboard.py
 
 This file can run SLAM or localization on board, offline or online
 """

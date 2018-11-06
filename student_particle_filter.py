@@ -79,7 +79,7 @@ class ParticleSet:
 
 particles = ParticleSet(NUM_PARTICLES)
 
-pose_path = 'particle_filter_data.txt'
+pose_path = <path to file with path data>
 
 try:
     pp = open(pose_path, 'w')

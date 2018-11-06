@@ -1,11 +1,3 @@
-"""
-MatplotLib Animation Code by Jake Vanderplas used with permission
-
-email: vanderplas@astro.washington.edu
-website: http://jakevdp.github.com
-license: BSD
-"""
-
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -63,8 +55,6 @@ def read_pose_file(path, num_particles):
 
 class ParticleBox:
     """
-    Orbits class
-
     Given m particles and n time steps:
 
     particles:   0      1             m      |  time:
