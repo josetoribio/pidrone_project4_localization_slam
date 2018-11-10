@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 vision_localization_onboard.py
 
@@ -9,13 +10,16 @@ from student_localization_helper import *
 from cv_bridge import CvBridge, CvBridgeError
 import sys
 import os
+import picamera
 import camera_info_manager
 import rospy
+from geometry_msgs.msg import PoseStamped
 from sensor_msgs.msg import Image, Range, CameraInfo
 from analyze_flow import AnalyzeFlow
 from std_msgs.msg import Empty
 from pidrone_pkg.msg import State
 import argparse
+import tf
 
 # ---------- map parameters ----------- #
 MAP_PIXEL_WIDTH = 3227  # in pixel

@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   std_msgs
   message_generation
+  pidrone_pkg
 )
 
 ## System dependencies are found with CMake's conventions
@@ -45,16 +46,9 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-add_message_files(
-  FILES
-  RC.msg
-  Mode.msg
-  Battery.msg
-  State.msg
-  StateGroundTruth.msg
-  UkfStats.msg
-
-)
+# add_message_files(
+# FILES
+#)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
