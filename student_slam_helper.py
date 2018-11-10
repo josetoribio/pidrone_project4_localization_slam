@@ -93,7 +93,8 @@ class FastSLAM:
         ##############################################################################
         # TODO Initialize the set of particles for FASTSLAM with x,y poses around 0,
         #      z initialized to self.z, and yaw intialized to pi. Be sure to add noise
-        #      to the z,y, and yaw initiale estimates!
+        #      to the z,y, and yaw initial estimates!
+        # Be sure to call it 'self.particles'
 
         ##############################################################################
 
@@ -169,31 +170,31 @@ class FastSLAM:
         ##############################################################################
         # TODO use the x,y,yaw transformation between the previous frame and this one
         #      to update the pose of particle. Be sure to add different noise for each
-        #      dimension and you may the z pose of each particle to self.z
+        #      dimension and you may set the z pose of each particle to self.z
 
         ##############################################################################
 
     def detect_keyframe(self, kp, des):
         """
-        Checks if there is a previous keyframe, and if not, starts  a new one. If the distance between the
-        previous keyframe and the current frame is above a threshold, do a map update thread. Or, if
-        we cannot transform between the previous keyframe and this frame, also do a map update.
+        Performs a map update if there is not a previous keyframe, the distance between 
+        the previous keyframe and the current frame is above a threshold, or if we cannot
+        transform between the previus frame and this one. 
 
         :param kp, des: the lists of keypoints and descriptors
         """
         ##############################################################################
         # TODO implement this method, we provide some pseudocode for doing this, please call
         #      self.update_map to update the map
-
+        #
         # if there is a previous keyframe:
-        #   transform = distance from previous keyframe to current one (use computer transform)
-        #   if transform is none:
+        #   transform = distance from previous keyframe to current one (use compute transform)
+        #   if transform is None:
         #       do map update 
         #   else:
         #       x = self.pixel_to_meter(-transform[0, 2])
         #       y = self.pixel_to_meter(transform[1, 2])
         #       yaw = -np.arctan2(transform[1, 0], transform[0, 0])
-        #       if distance is greater than keyframe threshold or yaw is greater than yaw threshold:
+        #       if distance(x,y) is greater than keyframe threshold or yaw is greater than yaw threshold:
         #           do map upate
         # else:
         #    do map update
@@ -225,25 +226,25 @@ class FastSLAM:
         :param keypoints, descriptors: the lists of currently observed keypoints and descriptors
 
         This function is the meat of the SLAM algorithm and the main difference from your 
-        localization code. Here, you will associate the currently observed keypoints with
-        the set of landmarks in each particle. You will consider each detected keypoint and try to 
+        localization code. Here, you will associate the currently observed features with
+        the set of landmarks in each particle. You will consider each detected feature and try to 
         match it on the set of landmarks in the particle within a close range (self.perceptual_range) 
         to the drone. This ensures that the map in each particles is conditioned on the robot path
         represented by that particle alone.
 
         If there is a decent match (see your code from the OpenCV assignment for determining match quality),
-        then you will update the ekf of that lankmark with the keypoint's location by calling utils.update_landmark
-        and if the match is poor, then you will add the keypoint as a new landmark with utils.add_landmark.
+        then you will update the ekf of that landmark with the new feature's location by calling utils.update_landmark
+        and if the match is poor, then you will add the feature as a new landmark with utils.add_landmark.
 
         We should take adding a new landmark into account for the particle's weight since
-        expanding the map reduces certainty, so subtract from the particle's weight. When updating a 
-        landmark, you should adjust the weight of the particle by some number proportional to the 
-        quality of the match to reflect how certain we are that the observed keypoint matches
+        expanding the map reduces certainty, so subtract from the particle's weight when you do this.
+        When updating a landmark, you should adjust the weight of the particle by some number proportional to the 
+        quality of the match to reflect how certain we are that the observed feature matches
         the existing landmark.
 
         Finally, we need a mechanism to ensure that dubious, or low quality, landmarks are removed from the
         map. To do this, we will keep track of the number of times a landmark in the map is matched to by
-        the keypoints, and if it not seen for a while, we will remove that landmark.
+        newly observed features, and if it not seen for a while, we will remove that landmark.
 
         Here, we include the function signatures for the methods from utils which you will need to 
         implement update_particle:
@@ -274,19 +275,16 @@ class FastSLAM:
         particle.weight = PROB_THRESHOLD
 
         ##############################################################################
-        # TODO implement the update particle method to update the map for FastSLAM! This
-        #      ends up being quite long and a little tricky, so we've inclded some 
-        #      psuedocode to guide you through it! Note that in some place it is actual
-        #      python, in which case you must use those snippets in your solution.
+        # TODO implement the update particle method to update the map for FastSLAM! 
         #
         # if this particle has no landmarks:
         #    add every currently observed feature to the particle as a landmark
-        #    increment the weight of the particle by the log of the probability threshold
+        #    increment the weight of the particle by the log of PROB_THRESHOLD
         # else:
-        #    close landmarks = list of particle's landmarks within self.perceptual_range of the particles pose
+        #    close landmarks = list of particle's landmarks within self.perceptual_range of the particle's pose
         #    if close landmarks is not empty:
         #        part_descriptors = list of landmark.des for each landmark in close_landmarks
-        #        matched_landmarks = boolean (false) list with same length as close_landmarks
+        #        matched_landmarks = boolean list with same length as close_landmarks, set to false
         #
         #    for each kp and des in keypoints and descriptors:
         #        if part_descriptors is not empty:
@@ -300,8 +298,8 @@ class FastSLAM:
         #            matched_landmarks[index_in_close_landmarks] = True
         #            dated_landmark = close_landmarks[index_in_close_landmarks]
         #
-        #            updated_landmark = date_landmark update with kp and des
-        #            * set the correct landmark in particle.landmarks to update_landmark
+        #            updated_landmark = date_landmark updated with kp and des
+        #            * set the correct landmark in particle.landmarks to updated_landmark
         #            particle.weight += math.log(scale_weight(match[0].distance, match[1].distance))
         #
         # * this step is the most tricky because the index of the landmark in the close_landmarks list
@@ -309,6 +307,7 @@ class FastSLAM:
         #   contains some of the landmarks in particle.landmarks
         ##############################################################################
 
+            # this bit of code removes dubious landmarks from the particle
             if matched_landmarks is not None:
                 # increment counter for revisited particles, and decrement counter for non-revisited particles
                 removed = []
@@ -343,7 +342,6 @@ class FastSLAM:
         """
         ##############################################################################
         # TODO paste your code from localization to convert pixels to meters
-
         ##############################################################################
 
     def kp_to_measurement(self, kp):
@@ -380,13 +378,25 @@ class FastSLAM:
         :return: a new set of particles, resampled with replacement according to their weight
         """
 
+        weight_sum = 0.0
         new_particles = []
+        normal_weights = np.array([])
 
-        ##############################################################################
-        # TODO resample the set of particles according to their weights using copy.deepcopy
-        #      most or all of this may you code you have already written for localization
+        weights = [p.weight for p in self.particles]
+        lowest_weight = min(weights)
 
-        ##############################################################################
+        for w in weights:
+            x = 1 - (w / lowest_weight)
+            if x == 0:
+                x = PROB_THRESHOLD
+            normal_weights = np.append(normal_weights, x)
+            weight_sum += x
+
+        normal_weights /= weight_sum
+        samples = np.random.multinomial(self.num_particles, normal_weights)
+        for i, count in enumerate(samples):
+            for _ in range(count):
+                new_particles.append(copy.deepcopy(self.particles[i]))
 
         self.particles = new_particles
 
@@ -422,7 +432,6 @@ def estimate_pose(particles):
     ##############################################################################
     # TODO return the [x,y,z,yaw] pose estimate of the robot, you may reuse some or all of 
     #      your localization code to do this
-
     ##############################################################################
 
 

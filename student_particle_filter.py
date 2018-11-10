@@ -2,7 +2,7 @@ import numpy as np
 import math
 import copy
 
-NUM_PARTICLES = <choose a number>
+NUM_PARTICLES = 100
 UPDATE_VARIANCE = 0.1
 TARGET = <choose a location with both x,y within 0-10>
 
@@ -10,10 +10,11 @@ TARGET = <choose a location with both x,y within 0-10>
 class Particle:
     """
     Class to hold a particle in your filter. Should store its position (x,y)
-    and its weight. Once optimized in problem 6, it should store the set of
+    and its weight. Note that the weight field must
+    be called "weight." Once optimized in problem 6, it should store the set of
     all weights and poses as numpy arrays. Depending on how you implement the
-    optimization, it may also need fields or methods for retrieving its own
-    weight and pose.
+    optimization, it may also need fields or methods for retrieving the particle's
+    own weight and pose.
     """
     def __init__(self):
 
@@ -23,14 +24,15 @@ class ParticleSet:
     Class to hold the set of particles and the methods which will operate on them.
     You may want to also store the target pose here as well. Remember, the goal
     is for the (x,y) positions of the set of particles to converge on the
-    target pose.You must implement a motion model, measurement_model,
-    resampling method, and a method for upating the filter. Detailed instructions
-    are in the "Localization Assignment" page in the online textbook.
+    target pose. You must implement a motion model, measurement_model, and
+    resampling method.
     """
+
     def __init__(self, num_particles):
         """
         Takes the number of particles as input and creates a set of particles at
-        random positions.
+        random positions. Note: the list of particles must be called "particle"
+        and the particle poses should be within 0-10 on x and y
         """
 
     def motion_model(self):
@@ -45,7 +47,10 @@ class ParticleSet:
     def measurement_model(self):
         """
         Sets the weight of each particle inversely proportional to the
-        particle’s distance from the desired pose. This weighting scheme will
+        particle’s distance from the desired pose. ie, if a particle is close
+        to the desired pose, it should have a high weight, and if a particle
+        is far from the desired pose, it should have a low weight. Recall that
+        X is inversely proportional to Y if X = 1/Y. This weighting scheme will
         ensure that particles closest to the target have higher weights, and
         thus are resampled with a higher probability.
         """
@@ -56,20 +61,26 @@ class ParticleSet:
         The goal is for each particle to be resampled with a probability that
         corresponds to its weight, therefore the particle set converges on the
         desired pose (particles closest to the target pose are more likely to be
-        resampled). You will want to use copy.deepcopy to create a copy of each
-        re-sampled particle.
-
-        Hint: try using numpy.random.multinomial to generate the set of new
-        samples.
+        resampled). This method is tricky and has been implemented for you.
         """
 
-    def update_filter(self):
-        """
-        Updates the filter by calling motion_model, measurement_model, then
-        resample_particles.
-        """
+        new_particles = []
 
+        # get the list of particle weights, and normalize them
+        weights = np.array([p.weight for p in self.particles])
+        weights_sum = np.sum(weights)
+        normal_weights = weights / float(weights_sum)
 
+        # choose samples from old particle set based on weights
+        samples = np.random.multinomial(self.num_particles, normal_weights)
+        for i, count in enumerate(samples):
+            for _ in range(count):
+                p = copy.deepcopy(self.particles[i])
+                p.weight = PROB_THRESHOLD
+                new_particles.append(p)
+
+        # replace the set of particles
+        self.particles = new_particles
 
 
 
@@ -79,15 +90,14 @@ class ParticleSet:
 
 particles = ParticleSet(NUM_PARTICLES)
 
-pose_path = <path to file with path data>
+pose_path = 'particle_filter_data.txt'
 
 try:
     pp = open(pose_path, 'w')
     for _ in range(500):
-        particles.update()
-        particles.weight()
-
-        particles.resample()
+        particles.motion_model()
+        particles.measurement_model()
+        particles.resample_particles()
 
         for p in particles.particles:
             pp.write(str(p.pose[0]) + '\n' + str(p.pose[1]) + '\n')

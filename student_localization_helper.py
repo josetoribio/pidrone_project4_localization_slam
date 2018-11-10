@@ -2,7 +2,7 @@
 student_localization_helper
 
 Fill in the methods according to the docstrings in order to implement
-localization on your drone. Run vision_localization_onboard to test your
+localization on your drone. Run student_run_localization to test your
 implementation. We expect that you will re-use code from the particle filter and
 OpenCV assignments to complete this task! You should not need to define
 any other methods to complete this task, though you may do so if you feel like
@@ -43,9 +43,10 @@ MAP_FEATURES = 600
 
 class Particle(object):
     """
-    Each particle holds the complete set of poses and weights for all
+    Each particle holds the complete set of poses and weights for each
     of the particles in the filter. Note that z position should be stored by
-    the particle but is not estimated by the particle filter.
+    the particle but is not estimated by the particle filter. Each item
+    in the poses list will be the list [x,y,z,yaw].
     """
 
     def __init__(self, i, poses, weights):
@@ -77,13 +78,17 @@ class ParticleSet(object):
 
     def __init__(self, num_particles, poses):
         """
-        Take the set of poses (determined by initialize_particles) and the
-        number of particles as input and create the set of particles. You may
-        assign to each particle the weight PROB_THRESHOLD.
+        Take the set of poses and the number of particles as input and creates 
+        the set of particles. You may assign to each particle the weight 
+        PROB_THRESHOLD.
         """
 
         #######################################################################
-        # TODO implement this class                                           
+        # TODO implement this class 
+        # 1 Create the list of particle weights, saved as a 'weights' field
+        # 2 Create the list self.particles where each particle gets initialized
+        #   with with its number, the list of poses, and the list of weights
+        # 3 save self.poses and self.num_particles as fields                                        
         #######################################################################
 
 
@@ -138,10 +143,10 @@ class LocalizationParticleFilter:
         :return: the drone's position estimate
 
         Do a motion update on every frame, and a measurement update whenever
-        there is a keyframe. Consider what happens when there is no previous
-        keyframe, or the drone has moved too far to transform from the last
-        keyframe! You must also choose a threshold for the distance which must
-        pass between camera frames to trigger a measurement update.
+        there is a keyframe (the drone has moved a certain distance since the
+        last time we determined a keyframe).You must choose a threshold for 
+        the distance which must pass between camera frames to trigger a measurement 
+        update.
         """
         # update parameters
         self.z = z
@@ -151,21 +156,29 @@ class LocalizationParticleFilter:
         #######################################################################
         # TODO: implement the pseudo-code in this method!
         #
-        # if there is a previous keyframe:
-        #   transform = distance from previous keyframe to current one (use compute transform)
-        #   if transform is none:
-        #       perform an update
-        #       reset self.key_kp/des
-        #   else:
-        #       x = self.pixel_to_meter(-transform[0, 2])
-        #       y = self.pixel_to_meter(transform[1, 2])
-        #       yaw = -np.arctan2(transform[1, 0], transform[0, 0])
-        #       if distance is greater than keyframe threshold or yaw is greater than yaw threshold:
-        #           perform an update
+        # transform = transformation from prev kp and des to current kp and des
+        # if transform is not None:
+        #   x = self.pixel_to_meter(-transform[0, 2])
+        #   y = self.pixel_to_meter(transform[1, 2])
+        #   yaw = -np.arctan2(transform[1, 0], transform[0, 0])
+        # 
+        #   perform a motion prediction with x, y, and yaw
+        #   
+        #   if there is a previous keyframe (self.key_kp/des are not None):
+        #       transform = distance from previous keyframe to current one (use compute transform)
+        #       if transform is none:
+        #           perform a measurement update
         #           reset self.key_kp/des
-        # else:
-        #    perform an update
-        #    reset self.key_kp/des
+        #       else:
+        #           x = self.pixel_to_meter(-transform[0, 2])
+        #           y = self.pixel_to_meter(transform[1, 2])
+        #           yaw = -np.arctan2(transform[1, 0], transform[0, 0])
+        #           if distance is greater than keyframe threshold or yaw is greater than yaw threshold:
+        #               perform a measurement update
+        #               reset self.key_kp/des
+        #   else:
+        #       perform a measurement update
+        #       reset self.key_kp/des
         #
         # resample the set of particles
         # return the estimated position
@@ -214,7 +227,7 @@ class LocalizationParticleFilter:
         probability.
 
         We have provided a function called "norm pdf" which allows you to obtain
-        the probably of a particular sample given a mean and variance. See the
+        the probability of a particular sample given a mean and variance. See the
         docstring on the method in order to use it. You should use this method
         to determine the probability of each particle's error. Specifically, use
         norm_pdf with a mean of zero, which will give you the probability that
@@ -250,24 +263,36 @@ class LocalizationParticleFilter:
             #
             # 1 add some noise to the global pose (pose) using np.random.normal
             # 2 find the difference in x, y, yaw between the global pose and 
-            #   the particle's position
+            #   the particle's position (position)
             # 3 call adjust_angle on the difference of yaw to keep it within
             #   -pi/2 and pi/2
             # 4 find the probabilities of the errors using norm_pdf (see docstring above)
+            #   this should look like: norm_pdf(pose-position, 0, variance)
             # 5 set the weight of the particle to the max of PROB_THRESHOLD and the
-            #   produce of the probabilities
+            #   product of the probabilities for the error in x, y, and yaw
             #######################################################################
 
     def resample_particles(self):
         """
-        Sample a new particle set, reproducing each particle with a probability
-        proportional to its weight. You may use your code from the particle
-        filter assignment for this method.
+        Samples a new particle set, reproducing each particle with a probability
+        proportional to its weight. 
         """
 
-        #######################################################################
-        # TODO implement this method
-        #######################################################################
+        weights_sum = np.sum(self.particles.weights)
+        new_poses = []
+        new_weights = []
+
+        normal_weights = self.particles.weights / float(weights_sum)  # normalize
+        # samples sums to num_particles with same length as normal_weights, 
+        # positions with higher weights are more likely to be sampled
+        samples = np.random.multinomial(self.particles.num_particles, normal_weights)
+        for i, count in enumerate(samples):
+            for _ in range(count):
+                new_poses.append(self.particles.poses[i])
+                new_weights.append(self.particles.weights[i])
+
+        self.particles.poses = np.array(new_poses)
+        self.particles.weights = np.array(new_weights)
 
     def get_estimated_position(self):
         """
@@ -283,7 +308,12 @@ class LocalizationParticleFilter:
 
         #######################################################################
         # TODO implement this method
+
+        # 1. compute the estimated values x, y, z, yaw 
+        # 2. compute the average weight value: avg_weight
         #######################################################################
+
+        return Particle(0, np.array([[x, y, z, yaw]]), np.array([avg_weight]))
 
     def initialize_particles(self, num_particles, kp, des):
         """
@@ -333,7 +363,7 @@ class LocalizationParticleFilter:
         """
         Returns the pixel transformation matrix (output of estimateRigidTransform)
         from kp1 to kp2. This is used to find the distance between camera frames.
-        This should be almost entirely code from the OpenCV assignment!
+        This should be entirely code from the OpenCV assignment!
 
         :param kp1: the first list of keypoints
         :param des1: the first list of descriptors
@@ -392,7 +422,7 @@ class LocalizationParticleFilter:
 
     def pixel_to_meter(self, px):
         """
-        Uses the camera scale to return the pixel measurement converted into
+        Uses the CAMERA_SCALE to return the pixel measurement converted into
         meters. Note that this requires knowledge of the height of the drone.
         You should use your code from the OpenCV assignment to implement this
         method.
@@ -412,10 +442,12 @@ def adjust_angle(angle):
     :param angle: the angle to keep within -pi and pi
     :return: angle adjusted to stay within the range -pi to pi
     """
+    while angle > math.pi:
+        angle -= 2 * math.pi
+    while angle <= -math.pi:
+        angle += 2 * math.pi
 
-    #######################################################################
-    # TODO implement this method
-    #######################################################################
+    return angle
 
 
 def create_map(file_name):
