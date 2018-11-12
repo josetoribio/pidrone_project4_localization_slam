@@ -147,6 +147,19 @@ class LocalizationParticleFilter:
         last time we determined a keyframe).You must choose a threshold for 
         the distance which must pass between camera frames to trigger a measurement 
         update.
+
+        The kp and des of the previous keyframe should be stored in self.kp
+        and self.des. You should use self.compute_transform to find the 
+        distance between the previous camera frame and the current one 
+        to use as a control input for the motion model. 
+
+        You must then determine when to perform a measurement update by 
+        comparing the current image to the last keyframe image. Make sure
+        you consider what will happen when:
+        1. there is no previous keyframe
+        2. the camera has moved too far to transform from the previous keyframe
+        
+        Also consider when it is necessary to resample!
         """
         # update parameters
         self.z = z
@@ -154,34 +167,16 @@ class LocalizationParticleFilter:
         self.angle_y = angle_y
 
         #######################################################################
-        # TODO: implement the pseudo-code in this method!
+        # TODO: implement this method!
         #
-        # transform = transformation from prev kp and des to current kp and des
-        # if transform is not None:
-        #   x = self.pixel_to_meter(-transform[0, 2])
-        #   y = self.pixel_to_meter(transform[1, 2])
-        #   yaw = -np.arctan2(transform[1, 0], transform[0, 0])
-        # 
-        #   perform a motion prediction with x, y, and yaw
-        #   
-        #   if there is a previous keyframe (self.key_kp/des are not None):
-        #       transform = distance from previous keyframe to current one (use compute transform)
-        #       if transform is none:
-        #           perform a measurement update
-        #           reset self.key_kp/des
-        #       else:
-        #           x = self.pixel_to_meter(-transform[0, 2])
-        #           y = self.pixel_to_meter(transform[1, 2])
-        #           yaw = -np.arctan2(transform[1, 0], transform[0, 0])
-        #           if distance is greater than keyframe threshold or yaw is greater than yaw threshold:
-        #               perform a measurement update
-        #               reset self.key_kp/des
-        #   else:
-        #       perform a measurement update
-        #       reset self.key_kp/des
+        # Note: if transform is the output of self.compute_location then:
         #
-        # resample the set of particles
-        # return the estimated position
+        # x = -transform[0, 2]
+        # y = transform[1, 2]
+        # yaw = -np.arctan2(transform[1, 0], transform[0, 0])
+        # all of which are measured in pixels
+        #
+        # be sure to return the estimated position 
         #######################################################################
 
     def motion_model(self, x, y, yaw):
@@ -216,13 +211,12 @@ class LocalizationParticleFilter:
         the "true" pose of the robot. We will obtain the true pose by computing 
         the location of the drone's current image in the larger map.
 
-        The math you will use for this method roughly follows the
-        landmark_model_known_correspondence from table 6.4 in Probablistic
-        Robotics. We have provided a bit of code which will get the kp and
-        des from the 8 map grids immediately surrounding the pose of each
-        particle.
+        To implement this method, you should follow the "landmark model known
+        correspondence" algorithm in the textbook online.
 
-        Your job is to compute the probability that each particle's pose is
+        We have provided a bit of code which will get the kp and
+        des from the 8 map grids immediately surrounding the pose of each
+        particle. Your job is to compute the probability that each particle's pose is
         the correct pose of the drone and set the weight of the particle to that
         probability.
 
@@ -230,9 +224,9 @@ class LocalizationParticleFilter:
         the probability of a particular sample given a mean and variance. See the
         docstring on the method in order to use it. You should use this method
         to determine the probability of each particle's error. Specifically, use
-        norm_pdf with a mean of zero, which will give you the probability that
-        a sample from the normal distribution would differ from zero as much as
-        it does, ie numbers far from zero have lower probability of being sampled
+        norm_pdf with a mean of zero, which will give you the probability of drawing
+        a sample from the normal distribution with a mean of zero, ie numbers far 
+        from zero have lower probability of being sampled
         from this distribution. The sample you should consider is the error
         between the pose of each particle and the true pose of the drone.
 
@@ -261,13 +255,12 @@ class LocalizationParticleFilter:
             # Note: use self.sigma_x/y/yaw to use as the variance for norm_pdf and
             # for np.random.normal
             #
-            # 1 add some noise to the global pose (pose) using np.random.normal
-            # 2 find the difference in x, y, yaw between the global pose and 
-            #   the particle's position (position)
+            # 1 add some noise to the global pose (pose)
+            # 2 find the errors between the global pose (pose) and the pose of 
+            #   each particle (position)
             # 3 call adjust_angle on the difference of yaw to keep it within
             #   -pi/2 and pi/2
             # 4 find the probabilities of the errors using norm_pdf (see docstring above)
-            #   this should look like: norm_pdf(pose-position, 0, variance)
             # 5 set the weight of the particle to the max of PROB_THRESHOLD and the
             #   product of the probabilities for the error in x, y, and yaw
             #######################################################################

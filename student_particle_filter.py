@@ -31,11 +31,11 @@ class ParticleSet:
     def __init__(self, num_particles):
         """
         Takes the number of particles as input and creates a set of particles at
-        random positions. Note: the list of particles must be called "particle"
-        and the particle poses should be within 0-10 on x and y
+        random positions. Note: the list of particles must be called "particles"
+        and the particle poses should be within the range 0<x<10 and 10<y<10
         """
 
-    def motion_model(self):
+    def particle_motion(self):
         """
         Adds some random Gaussian noise to the x and y positions of each
         particle in the filter. Be sure that the noise is different for each
@@ -44,7 +44,7 @@ class ParticleSet:
         Hint: try numpy.random.normal
         """
 
-    def measurement_model(self):
+    def weight_particles(self):
         """
         Sets the weight of each particle inversely proportional to the
         particle’s distance from the desired pose. ie, if a particle is close
@@ -95,8 +95,8 @@ pose_path = 'particle_filter_data.txt'
 try:
     pp = open(pose_path, 'w')
     for _ in range(500):
-        particles.motion_model()
-        particles.measurement_model()
+        particles.particle_motion()
+        particles.weight_particles()
         particles.resample_particles()
 
         for p in particles.particles:
