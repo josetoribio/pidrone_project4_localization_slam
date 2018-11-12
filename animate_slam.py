@@ -68,7 +68,7 @@ def animate(count):
         ax.scatter(x, y, 5, label=labels[i], color=colors[i])
         plt.xlim(-0.25, 0.75)
         plt.ylim(0, 0.6)
-        plt.title("The Amazing SLAM Visualization Engine")
+        plt.title("DuckieDrone SLAM")
 
     ax.legend(fontsize='medium')
 

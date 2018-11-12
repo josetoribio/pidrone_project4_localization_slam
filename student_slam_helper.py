@@ -141,20 +141,14 @@ class FastSLAM:
         # reflect that the drone can see more or less if its height changes
         self.update_perceptual_range()
 
-        # compute transformation from previous frame
-        transform = utils.compute_transform(self.matcher, prev_kp, prev_des, kp, des)
-
-        if transform is not None:
-            x = -transform[0, 2]
-            y = transform[1, 2]
-            yaw = -np.arctan2(transform[1, 0], transform[0, 0])
-
-            # update poses with motion prediction
-            for p in self.particles:
-                self.predict_particle(p, x, y, yaw)
-
-            # (potentially) do a map update
-            self.detect_keyframe(kp, des)
+        ##################################################################################
+        # TODO implement the remainder of this method
+        #
+        # Just as in localization, you will need to update each particle with the motion
+        # estimate given by "utils.compute_transform"
+        # Then, you should call self.detect_keyframe to determine whether to perform
+        # a map update
+        ##################################################################################
 
         return estimate_pose(self.particles), self.weight
 
@@ -165,7 +159,7 @@ class FastSLAM:
 
         :param particle:  the particle containing the robot's position information
         :param x, y, yaw: the "controls" computed by transforming the previous camera frame to this one to
-                          find the dislplacement, these are measured in pixels!
+                          find the dislplacement, NOTE these are measured in pixels!
         """
         ##############################################################################
         # TODO use the x,y,yaw transformation between the previous frame and this one
@@ -176,49 +170,33 @@ class FastSLAM:
 
     def detect_keyframe(self, kp, des):
         """
-        Performs a map update if there is not a previous keyframe, the distance between 
-        the previous keyframe and the current frame is above a threshold, or if we cannot
-        transform between the previus frame and this one. 
+        Performs a map update if 
+        1) there is not a previous keyframe
+        2) the distance between the previous keyframe and the current frame is above a threshold
+        3) we cannot transform between the previus frame and this one. 
 
         :param kp, des: the lists of keypoints and descriptors
         """
         ##############################################################################
-        # TODO implement this method, we provide some pseudocode for doing this, please call
-        #      self.update_map to update the map
+        # TODO implement this method, please call self.update_map to update the map
         #
-        # if there is a previous keyframe:
-        #   transform = distance from previous keyframe to current one (use compute transform)
-        #   if transform is None:
-        #       do map update 
-        #   else:
-        #       x = self.pixel_to_meter(-transform[0, 2])
-        #       y = self.pixel_to_meter(transform[1, 2])
-        #       yaw = -np.arctan2(transform[1, 0], transform[0, 0])
-        #       if distance(x,y) is greater than keyframe threshold or yaw is greater than yaw threshold:
-        #           do map upate
-        # else:
-        #    do map update
-
-
+        # Note that if transform is the transformation matrix from utils.compute_transform
+        #       then: x = -transform[0, 2]
+        #             y = transform[1,2]
+        #             yaw = -np.arctan2(transform[1, 0], transform[0, 0])
         ##############################################################################
 
     def update_map(self, kp, des):
         """
-        Performs a map update on every particle, sets the average particle weight, resamples the 
-        set of particles, and sets the new keyframe to the current frame.
+        Perform a map update on every particle, sets self.weight to the average particle weight, 
+        resamples the set of particles, and sets the new keyframe to the current frame.
 
         Please do not edit this method
 
         :param kp, des: the lists of keypoints and descriptors
         """
-        for p in self.particles:
-            self.update_particle(p, kp, des)
-
-        self.weight = self.get_average_weight()
-        self.resample_particles()
-
-        # set the new keyframe kp and des to the current ones
-        self.key_kp, self.key_des = kp, des
+        # TODO implement this method according to the docstring
+        # note: we have provided self.get_average_weight
 
     def update_particle(self, particle, keypoints, descriptors):
         """
@@ -275,32 +253,31 @@ class FastSLAM:
         particle.weight = PROB_THRESHOLD
 
         ##############################################################################
-        # TODO implement the update particle method to update the map for FastSLAM! 
+        # TODO implement this method to update the map for FastSLAM! 
         #
         # if this particle has no landmarks:
-        #    add every currently observed feature to the particle as a landmark
-        #    increment the weight of the particle by the log of PROB_THRESHOLD
+        #    add every currently observed feature as a landmark
+        #    adjust particle's weight to reflect the change in certainty from adding landmarks
         # else:
         #    close landmarks = list of particle's landmarks within self.perceptual_range of the particle's pose
         #    if close landmarks is not empty:
         #        part_descriptors = list of landmark.des for each landmark in close_landmarks
         #        matched_landmarks = boolean list with same length as close_landmarks, set to false
         #
-        #    for each kp and des in keypoints and descriptors:
+        #    for each observed feature:
         #        if part_descriptors is not empty:
         #            match = self.matcher.knnMatch(np.array([des]), np.array(part_descriptors), k=2)
         #
         #        if there was not match or the match is poor quality:
-        #            add kp and des as a new landmark
-        #            increment the weight of the particle by the log of the probability threshold
+        #            add the feature as a new landmark
+        #            adjust particle weight to reflect the change in certainty
         #        else:
-        #            index_in_close_landmarks = match[0].trainIdx
-        #            matched_landmarks[index_in_close_landmarks] = True
-        #            dated_landmark = close_landmarks[index_in_close_landmarks]
-        #
-        #            updated_landmark = date_landmark updated with kp and des
-        #            * set the correct landmark in particle.landmarks to updated_landmark
-        #            particle.weight += math.log(scale_weight(match[0].distance, match[1].distance))
+        #            use match.trainIdx to find the index of the matching landmark in the map
+        #            set the boolean corresponding to this landmark in matched_landmarks to true
+        #            update the landmark in particle.landmarks with information from the newly
+        #               observed feature*
+        #            update the weight of the particle to reflect the quality of the match
+        #               hint: use scale_weight
         #
         # * this step is the most tricky because the index of the landmark in the close_landmarks list
         #   is not the same as its index in particle.landmarks! This is because close_landmarks only
