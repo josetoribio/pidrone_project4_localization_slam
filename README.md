@@ -2,7 +2,7 @@
 The following is a list of the files included with your project handout and an explanation of their purposes:
 
 
-**pidrone_vision_instructions.md**: this is a general overview of running the vision programs on the pi. The parts that might concern you are the directions for changing the map for localization and running SLAM onboard the drone but offline to test your implementation. If you do not want to do those things, you will not need to read this file!  
+**pidrone_vision_instructions.md**: this is a general overview of running the vision programs on the pi. The parts that might concern you are the directions for changing the map for localization and for running SLAM onboard the drone but offline to test your implementation. If you do not want to do those things, you will not need to read this file!  
 
 ## Localization
 **student_particle_filter.py** This contains your implementation of the simple particle filter for the first part of the localization assignment.  
@@ -10,10 +10,10 @@ The following is a list of the files included with your project handout and an e
 **student_compute_displacement.py** This contains your implementation of the OpenCV task.  
 **answers.txt** This contains your answers to conceptual questions in the OpenCV task.  
 **student_localization_helper.py** This contains your implementation of localization for the PiDrone.  
-**vision_localization_onboard.py** This runs the student implementation of localization on the drone and does not need to be edited.  
+**student_run_localization.py** This runs the student implementation of localization on the drone and does not need to be edited.  
 
 ## SLAM
-**student_slam_helper.py** This contains your implementation of SLAM which you will develop on the department machines to run on sample data.  
+**student_slam_helper.py** This contains your implementation of SLAM which you will develop on the department machines or your own computer to run on sample data.  
 **slam.py** This codes run your SLAM implementation on the sample data and writes the output to a text file.  
 **animate_slam.py** This code uses matplotlib to animate the output of your SLAM implementation to show the TA for a checkoff.  
 **utils.py** This contains helper functions for your SLAM implementation like *add_landmark*.  

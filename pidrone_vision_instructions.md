@@ -1,4 +1,8 @@
-﻿
+﻿For convenience, here are instructions to change the map for the Localization project:
+
+It is easiest to take photos of the new map with a cell phone or other camera. Take them at a height of 25cm and use an image stitching software to generate the map. We recommend auto-stitch. Replace map.jpg with your new map and change the following four parameters in "student_run_localization.py", "student_localization_helper.py": MAP_PIXEL_WIDTH, MAP_PIXEL_HEIGHT, MAP_REAL_WIDTH, MAP_REAL_HEIGHT. You may need to resize the image to be smaller if it is too large.
+
+
 
 # PiDrone Vision Instructions
 

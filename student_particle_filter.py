@@ -16,7 +16,7 @@ class Particle:
     optimization, it may also need fields or methods for retrieving the particle's
     own weight and pose.
     """
-    def __init__(self):
+    def __init__(self, x, y):
 
 
 class ParticleSet:

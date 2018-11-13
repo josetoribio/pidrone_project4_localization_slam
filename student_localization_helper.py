@@ -56,13 +56,13 @@ class Particle(object):
 
     def weight(self): return self.weights[self.i]
 
-    def x(self): return self.weights[self.i, 0]
+    def x(self): return self.poses[self.i, 0]
 
-    def y(self): return self.weights[self.i, 1]
+    def y(self): return self.poses[self.i, 1]
 
-    def z(self): return self.weights[self.i, 2]
+    def z(self): return self.poses[self.i, 2]
 
-    def yaw(self): return self.weights[self.i, 3]
+    def yaw(self): return self.poses[self.i, 3]
 
     def __str__(self):
         return str(self.x()) + ' , ' + str(self.y()) + ' weight ' + str(self.weight())
@@ -154,7 +154,8 @@ class LocalizationParticleFilter:
         to use as a control input for the motion model. 
 
         You must then determine when to perform a measurement update by 
-        comparing the current image to the last keyframe image. Make sure
+        comparing the current image to the last keyframe image. Do this by
+        comparing the current kp and des to self.key_kp and self.key_des. Make sure
         you consider what will happen when:
         1. there is no previous keyframe
         2. the camera has moved too far to transform from the previous keyframe
@@ -169,7 +170,7 @@ class LocalizationParticleFilter:
         #######################################################################
         # TODO: implement this method!
         #
-        # Note: if transform is the output of self.compute_location then:
+        # Note: if transform is the output of self.compute_transform then:
         #
         # x = -transform[0, 2]
         # y = transform[1, 2]

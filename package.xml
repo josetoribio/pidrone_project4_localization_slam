@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>pidrone_project_localization</name>
+  <name>project_localization_yourGithubNname</name>
   <version>0.0.0</version>
-  <description>The pidrone_pkg package</description>
+  <description>Localization and SLAM Project Student Directory</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
