@@ -239,7 +239,7 @@ def update_landmark(particle, landmark, kp, des, sigma_observation, kp_to_measur
     K = compute_kalman_gain(H, S, Q)
 
     # calculate the new landmark's position estimate using the Kalman gain
-    old_landmark = np.array(landmark.x, landmark.y)
+    old_landmark = np.array([landmark.x, landmark.y])
     new_landmark = compute_new_landmark((dist, bearing), (predicted_dist, predicted_bearing), K, old_landmark)
 
     # compute the updated covariance of the landmark
