@@ -78,10 +78,11 @@ class ParticleSet(object):
     # weight, particle list, poses and num_particles
 
     def __init__(self, num_particles, poses):
-        self.weights = #todo
-        self.particles = #todo
-        self.poses = #todo
-        self.num_particles = #todo 
+        #TODO
+        self.weights = ... 
+        self.particles = ...
+        self.poses = ...
+        self.num_particles = ...
 
 
 class LocalizationParticleFilter:
@@ -90,33 +91,33 @@ class LocalizationParticleFilter:
     """
 
     def __init__(self, map_kp, map_des):
-        #todo 
-        self.map_kp = 
-        self.map_des = 
+        #TODO
+        self.map_kp = ...
+        self.map_des = ...
 
-        self.particles = 
-        self.measure_count = 
+        self.particles = ...
+        self.measure_count = ...
 
-        index_params = 
-        search_params = 
-        self.matcher = 
-        self.previous_time = 
+        index_params = ...
+        search_params = ...
+        self.matcher = ...
+        self.previous_time = ...
 
-        self.key_kp = 
-        self.key_des = 
+        self.key_kp = ...
+        self.key_des = ...
 
-        self.z = 
-        self.angle_x = 
-        self.angle_y = 
+        self.z = ...
+        self.angle_x = ...
+        self.angle_y = ...
 
-        self.sigma_x = 
-        self.sigma_y = 
-        self.sigma_yaw = 
+        self.sigma_x = ...
+        self.sigma_y = ...
+        self.sigma_yaw = ...
 
-        sigma_vx = 
-        sigma_vy = 
-        sigma_vz = 
-        sigma_yaw = 
+        sigma_vx = ...
+        sigma_vy = ...
+        sigma_vz = ...
+        sigma_yaw = ...
         self.covariance_motion = np.array([[sigma_vx ** 2, 0, 0, 0],
                                            [0, sigma_vy ** 2, 0, 0],
                                            [0, 0, sigma_vz ** 2, 0],
@@ -129,69 +130,69 @@ class LocalizationParticleFilter:
         des is the description of detected features
         """
         # update parameters
-        self.z = 
-        self.angle_x = 
-        self.angle_y = 
+        #TODO
+        self.z = ...
+        self.angle_x = ...
+        self.angle_y = ...
 
         transform = self.compute_transform(prev_kp, prev_des, kp, des)
 
         if transform is not None:
 
-            #todo 
-            x = 
-            y =
+            #TODO fill in all the code within this if statement
+            x = ...
+            y = ...
             # CCW rotation makes yaw more positive
-            yaw = #todo 
+            yaw = ...
 
             self.sample_motion_model(x, y, yaw)
 
             # if there is some previous keyframe
             if self.key_kp is not None and self.key_des is not None:
 
-                transform = #todo 
+                transform = ...
 
                 if transform is not None:
                     # distance since previous keyframe in PIXELS
-                    x = #todo 
-                    y = #todo 
-                    yaw = #todo 
+                    x = ...
+                    y = ... 
+                    yaw = ...
 
                     # if we've moved an entire camera frame distance since the last keyframe (or yawed 10 degrees)
-                    if #todo 
-
-                        #call the meaurement model and define key_kp and key_des
-                        
+                    if ... :
+                        #call the measurement model and define key_kp and key_des
+                        pass #replace with code
                 else:
                     # moved too far to transform from last keyframe, so set a new one
-                   
+                    pass #TODO: replace with code    
 
             # there is no previous keyframe
             else:
-               
+               pass #TODO: replace with code
 
         self.resample_particles()
         return self.get_estimated_position()
 
     def sample_motion_model(self, x, y, yaw):
         """
-        Implement motion model from Equation 3 in PiDrone Slam with noise.
+        TODO: Implement motion model from Equation 3 in PiDrone Slam with noise.
         """
         # add noise 
         noisy_x_y_z_yaw = np.random.multivariate_normal() #todo 
 
         for i in range(self.particles.num_particles):
-            pose = 
+            pose = ...
             old_yaw = pose[3]
             #q1
-            pose[0] +=
-            pose[1] += 
-            pose[2] = 
-            pose[3] += 
-            pose[3] = 
+            pose[0] += ...
+            pose[1] += ...
+            pose[2] = ...
+            pose[3] += ...
+            pose[3] = ...
 
     def measurement_model(self, kp, des):
         """
-        landmark_model_known_correspondence from probablistic robotics 6.6
+        landmark_model_known_correspondence from probabilistic robotics 6.6
         """
         for i in range(self.particles.num_particles):
             position = self.particles.poses[i]
@@ -207,23 +208,23 @@ class LocalizationParticleFilter:
             sub_map_des = self.map_des[grid_x][grid_y]
 
             # measure current global position
-            pose, num = 
+            pose, num = ...
 
-            # compute weight of particle
+            #TODO: compute weight of particle
             if pose is None:
-                q = #todo
+                q = ...
             else:
                 # add noise
-                noisy_pose = 
+                noisy_pose = ...
 
-                noisy_pose[3] = 
+                noisy_pose[3] = ...
 
-                yaw_difference = 
+                yaw_difference = ...
                 #adjust the angle of the yaw difference
-                yaw_difference = 
+                yaw_difference = ...
 
                 # norm_pdf(x, 0, sigma) gets you the probability of x
-                q = 
+                q = ...
 
             # keep floats from overflowing
             self.particles.weights[i] = max(q, PROB_THRESHOLD)
@@ -236,18 +237,18 @@ class LocalizationParticleFilter:
         new_poses = []
         new_weights = []
         #todo 
-        normal_weights =  # normalize
+        normal_weights = ... #TODO: normalize
         # samples sums to num_particles with same length as normal_weights, positions with higher weights are
         # more likely to be sampled
-        #todo 
-        samples = 
+        #TODO
+        samples = ...
         for i, count in enumerate(samples):
             for _ in range(count):
-                #get new poses and weights 
+                pass #TODO: get new poses and weights 
                 
         #use the new poses and weights
-        self.particles.poses = 
-        self.particles.weights = 
+        self.particles.poses = ...
+        self.particles.weights = ...
 
 
     def get_estimated_position(self):
@@ -262,18 +263,18 @@ class LocalizationParticleFilter:
 
         normal_weights = self.particles.weights / float(weights_sum)
         for i, prob in enumerate(normal_weights):
-            #multiply prob with each pose 
-            x += 
-            y += 
-            z += 
-            yaw += 
+            #TODO: multiply prob with each pose 
+            x += ...
+            y += ...
+            z += ...
+            yaw += ...
         #return the particle with all poses x,y,z,yaw
         #also return a np.array with the sum of weights divided by the particles weights size
         return #particle() , np.array())
 
     def initialize_particles(self, num_particles, kp, des):
         """
-        find most possible slocation to start
+        find most possible location to start
         :param num_particles: number of particles we are using
         :param kp: the keyPoints of the first captured image
         :param des: the descriptions of the first captured image
@@ -299,7 +300,7 @@ class LocalizationParticleFilter:
 
         # cannot find a match
         if len(poses) == 0:
-            print "Random Initialization"
+            print("Random Initialization")
             for x in range(MAP_GRID_SIZE_X):
                 for y in range(MAP_GRID_SIZE_Y):
                     #use pose.append 
@@ -317,20 +318,20 @@ class LocalizationParticleFilter:
                     #using a random sample 
 
 
-                    poses.append(#todo)
+                    poses.append(...) #TODO
 
 
                     weights_sum += 1.0  # uniform sample
                     weights.append(1.0)
 
-        # sample particles based on the number of matched features
-        weights =  # normalize
-        samples =   # sample
+        #TODO: sample particles based on the number of matched features
+        weights = ...  # normalize
+        samples =  ... # sample
         for i, count in enumerate(samples):
             for _ in range(count):
-                #append new poses by i
+                pass #TODO: append new poses by i
 
-        self.particles = #particle set with new poses )
+        self.particles = ... #TODO: particle set with new poses
         return self.get_estimated_position()
 
     def compute_location(self, kp1, des1, kp2, des2):
@@ -347,41 +348,41 @@ class LocalizationParticleFilter:
         pose = None
 
         if des1 is not None and des2 is not None:
-            matches = #use a knn matcher for des1 and des2
+            matches = ... #use a knn matcher for des1 and des2
 
             for match in matches:
             #if the length of match 0 is less than 1 and 
-            # the distance of match 0 is less that the ratio of match mutiplied by the distance of match 1 
+            # the distance of match 0 is less that the ratio of match multiplied by the distance of match 1 
 
-                if :
-                     #append good with the match at 0
+                if ... :
+                    pass #TODO: append good with the match at 0
 
             #if the length of good is more than the minimal math count
             if len(good) > MIN_MATCH_COUNT:
     
-                # Traverse through good in terms of M  
+                #TODO: Traverse through good in terms of M  
                 # queryIdx refers to keypoints1 and trainIdx refers to keypoints2,
                 #reshape both pts with -1,1,2
 
-                src_pts = 
-                dst_pts = 
-                #estimate rigit transfrom with the src pts and dst pts
+                src_pts = ...
+                dst_pts = ...
+                #TODO: estimate rigid transform with the src pts and dst pts
                 
-                transform = cv2.estimateRigidTransform( , , False)
+                transform = cv2.estimateRigidTransform( ... , ... , False)
                 
                 if transform is not None:
-                    transformed_center =  # get global pixel
-                    transformed_center =   # map to global pose
+                    transformed_center = ... # get global pixel
+                    transformed_center = ... # map to global pose
                     
-                    yaw =  # get global heading
+                    yaw =  ... # get global heading
 
                     # correct the pose if the drone is not level
-                    z = 
-                    offset_x = 
-                    offset_y = 
-                    global_offset_x = #cos
-                    global_offset_y = #sin
-                    pose = 
+                    z = ...
+                    offset_x = ...
+                    offset_y = ...
+                    global_offset_x = ... #cos
+                    global_offset_y = ... #sin
+                    pose = ...
 
         return pose, len(good)
 
@@ -389,26 +390,25 @@ class LocalizationParticleFilter:
         transform = None
 
         if des1 is not None and des2 is not None:
-            matches = #use knn match on the des1 and 2 with the k of 2
+            matches = ... #TODO: use knn match on the des1 and 2 with the k of 2
 
             good = []
             for match in matches:
-                #if the length of match is less than 1 and the distance of match 0 is less than the product of match ratio and match 1 distance
-                if 
-                    
-                    #append match 0 to good  
+                #TODO: if the length of match is less than 1 and the distance of match 0 is less than the product of match ratio and match 1 distance
+                if ... :
+                    pass #append match 0 to good  
 
 
             # queryIdx refers to keypoints1 and trainIdx refers to keypoints2,
-            #reshape both pts with -1,1,2
+            # TODO: reshape both pts with -1,1,2
                     
-            src_pts =  
-            dst_pts = 
+            src_pts = ...
+            dst_pts = ...
 
             # estimateRigidTransform needs at least three pairs
             if src_pts is not None and dst_pts is not None and len(src_pts) > 3 and len(dst_pts) > 3:
-                #use estimate rigid transform on sec and dst pts
-                transform = 
+                #TODO: use estimate rigid transform on sec and dst pts
+                transform = ...
 
         return transform
 
@@ -433,25 +433,25 @@ def adjust_angle(angle):
 
 def create_map(file_name):
     """
-    create a feature map, extract features from each bigger cell.
+    TODO: create a feature map, extract features from each bigger cell.
     :param file_name: the image of map
     :return: a list of center of bigger cells (kp and des), each bigger cell is a 3 by 3 grid (9 cells).
     """
 
     # read image and extract features
-    image = 
+    image = ...
 
-    max_total_keypoints = 
+    max_total_keypoints = ...
     # the edgeThreshold and patchSize can be tuned if the gap between cell is too large
-    detector = 
-    kp = 
-    kp, des = 
+    detector = ...
+    kp = ...
+    kp, des = ...
     # rearrange kp and des into grid
-    grid_kp = 
-    grid_des = 
+    grid_kp = ...
+    grid_des = ...
     for i in range(len(kp)):
-        x = 
-        y = 
+        x = ...
+        y = ...
 
         grid_kp[x][y].append(kp[i])
         grid_des[x][y].append(des[i])
@@ -466,12 +466,12 @@ def create_map(file_name):
                     x = i + k
                     y = j + l
                     if 0 <= x < MAP_GRID_SIZE_X and 0 <= y < MAP_GRID_SIZE_Y:
-                        #fill in the correct values for the 2d array
-                        map_grid_kp[i][j].extend(grid_kp[][])
-                        map_grid_des[i][j].extend(grid_des[][])
+                        #TODO: fill in the correct values for the 2d array
+                        map_grid_kp[i][j].extend(grid_kp[...][...])
+                        map_grid_des[i][j].extend(grid_des[...][...])
 
-            
-            map_grid_des[i][j] = np.array(map_grid_des[][])
+            #TODO: fill in the correct values
+            map_grid_des[i][j] = np.array(map_grid_des[...][...])
 
     return map_grid_kp, map_grid_des
 

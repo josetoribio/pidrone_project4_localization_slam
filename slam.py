@@ -26,13 +26,13 @@ for data in unprocessed_map_data:
     des_list = np.asarray(data[1], dtype=np.uint8)
     map_data.append((data[0], des_list))
 
-print map_data[0][1]
+print(map_data[0][1])
 
 slam_estimator = FastSLAM()
 slam_estimator.generate_particles(15)
 
 for i in range(1, len(map_data)):
-    print slam_estimator.run(z_data[i-1], map_data[i-1][0], map_data[i-1][1], map_data[i][0], map_data[i][1])
+    print(slam_estimator.run(z_data[i-1], map_data[i-1][0], map_data[i-1][1], map_data[i][0], map_data[i][1]))
 
 
 
