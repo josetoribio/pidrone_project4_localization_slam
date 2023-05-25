@@ -27,7 +27,7 @@ image_B = cv2.imread('img_B.jpg')
 # In this step, we extract the coordinates of salient features from each image,
 # called keypoints, as well as descriptors of those features.
 
-NUM_FEATURES = <choose a number of features>
+NUM_FEATURES = ... #<choose a number of features>
 detector = cv2.ORB(nfeatures=NUM_FEATURES, scoreType=cv2.ORB_FAST_SCORE)
 
 # TODO search "ORB" in the documentation, use detector.detectAndCompute(), called
@@ -85,8 +85,8 @@ matcher = cv2.FlannBasedMatcher(index_params, search_params)
 # TODO Obtain lists of the keypoint coordinates from both image A and image B
 # for each of the filtered matches. 
 
-image_A_match_keypoints = <list of image_A kp coords for each match>
-image_B_match_keypoints = <list of image_B kp coords for each match>
+image_A_match_keypoints = ... #<list of image_A kp coords for each match>
+image_B_match_keypoints = ... #<list of image_B kp coords for each match>
 
 
 ###############################################################################
@@ -107,7 +107,7 @@ imageB_points = np.float32(image_B_match_keypoints).reshape(-1, 1, 2)
 # In this step we will use the height of the drone to convert the pixel displacement 
 # from the transformation to meters.
 
-transform = <transformation computed with estimateRigidTransform>
+transform = ... #<transformation computed with estimateRigidTransform>
 x_displacement = -transform[0, 2]
 y_displacement = transform[1, 2]
 yaw_displacement = -np.arctan2(transform[1, 0], transform[0, 0])

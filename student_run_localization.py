@@ -44,15 +44,15 @@ class AnalyzePhase:
         self.bridge = CvBridge()
         self.br = tf.TransformBroadcaster()
 
-        self.posepub = 
-        self.first_image_pub = 
+        self.posepub = ...
+        self.first_image_pub = ...
         #opencv orb  create
-        self.detector = 
+        self.detector = ...
         #use map.jpg to create a map
-        map_grid_kp, map_grid_des = 
+        map_grid_kp, map_grid_des = ...
 
         #use map grid kp and des inside the localizationparticlefilter
-        self.estimator = 
+        self.estimator = ...
 
         # [x, y, z, yaw]
         self.pos = [0, 0, 0, 0]
@@ -82,59 +82,59 @@ class AnalyzePhase:
     #todo image callback
     def image_callback(self, data):
        
-        curr_img = 
-        curr_rostime = =
-        self.posemsg.header.stamp = 
-        curr_time = 
+        curr_img = ...
+        curr_rostime = ...
+        self.posemsg.header.stamp = ...
+        curr_time = ...
 
         #todo
         # start MCL localization
         if self.locate_position:
-            curr_kp, curr_des = 
+            curr_kp, curr_des = ...
 
             if curr_kp is not None and curr_kp is not None:
                 # generate particles for the first time
                 if self.first_locate:
-                    particle = 
-                    self.first_locate = 
-                    self.pos = 
+                    particle = ...
+                    self.first_locate = ...
+                    self.pos = ...
 
-                    self.posemsg.pose.position.x = 
-                    self.posemsg.pose.position.y = 
-                    self.posemsg.pose.position.z = 
-                    x, y, z, w = 
+                    self.posemsg.pose.position.x = ...
+                    self.posemsg.pose.position.y = ...
+                    self.posemsg.pose.position.z = ...
+                    x, y, z, w = ...
 
-                    self.posemsg.pose.orientation.x = 
-                    self.posemsg.pose.orientation.y = 
-                    self.posemsg.pose.orientation.z = 
-                    self.posemsg.pose.orientation.w = 
+                    self.posemsg.pose.orientation.x = ...
+                    self.posemsg.pose.orientation.y = ...
+                    self.posemsg.pose.orientation.z = ...
+                    self.posemsg.pose.orientation.w = ...
 
-                    print 'first', particle
+                    print('first', particle)
                 else:
-                    particle = 
+                    particle = ...
 
                     # update position
-                    self.pos = 
+                    self.pos = ...
 
 
-                    self.posemsg.pose.position.x = 
-                    self.posemsg.pose.position.y =
-                    self.posemsg.pose.position.z = 
-                    x, y, z, w = 
+                    self.posemsg.pose.position.x = ...
+                    self.posemsg.pose.position.y = ...
+                    self.posemsg.pose.position.z = ...
+                    x, y, z, w = ...
 
-                    self.posemsg.pose.orientation.x = 
-                    self.posemsg.pose.orientation.y = 
-                    self.posemsg.pose.orientation.z = 
-                    self.posemsg.pose.orientation.w = 
+                    self.posemsg.pose.orientation.x = ...
+                    self.posemsg.pose.orientation.y = ...
+                    self.posemsg.pose.orientation.z = ...
+                    self.posemsg.pose.orientation.w = ...
                     self.posepub.publish(self.posemsg)
 
-                    print '--pose', self.pos[0], self.pos[1], self.pos[3]
+                    print('--pose', self.pos[0], self.pos[1], self.pos[3])
 
                     # if all particles are not good estimations
                     #todo
                     if is_almost_equal(particle.weight(), PROB_THRESHOLD):
                         #subtract map counter by 1 
-                        self.map_counter = 
+                        self.map_counter = ...
                     elif self.map_counter <= 0:
                         #map counter equals 1 
                         self.map_counter = 1
@@ -142,17 +142,17 @@ class AnalyzePhase:
                         #use the min() function 
                         #min()has 2 arguments
                         #add to map counter and use -MAX_BAD_COUNT
-                        self.map_counter = 
+                        self.map_counter = ...
 
                     # if it's been a while without a significant average weight
                     if self.map_counter < MAX_BAD_COUNT:
                         self.first_locate = True
                         self.map_counter = 0
-                        print 'Restart localization'
+                        print('Restart localization')
 
-                    print 'count', self.map_counter
+                    print('count', self.map_counter)
             else:
-                print "CANNOT FIND ANY FEATURES !!!!!"
+                print("CANNOT FIND ANY FEATURES !!!!!")
 
             self.prev_kp = curr_kp
             self.prev_des = curr_des
@@ -169,13 +169,13 @@ class AnalyzePhase:
     def state_callback(self, data):
         """ update z, angle x, and angle y data when /pidrone/state is published to """
        #update with converiance
-        self.z = 
-        self.angle_x = 
-        self.angle_y = 
+        self.z = ...
+        self.angle_x = ...
+        self.angle_y = ...
 
     def reset_callback(self, data):
         """start localization when '/pidrone/reset_transform' is published to (press 'r')"""
-        print "Start localization"
+        print("Start localization")
         #SET TO TRUE
          
         #SET TO ZERO
@@ -192,7 +192,7 @@ def main():
     rospy.init_node(node_name)
     
     phase_analyzer = AnalyzePhase()
-s
+
     phase_analyzer = AnalyzePhase()
     #subcriber to reset_transform , raspicam_node and pidrone_state 
     #with the correct callback
@@ -200,7 +200,7 @@ s
     rospy.Subscriber("")
     rospy.Subscriber("")
 
-    print"Start")
+    print("Start")
 
     rospy.spin()
 
